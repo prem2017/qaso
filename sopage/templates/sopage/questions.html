@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<style type="text/css">
+
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+pre {
+	background-color: #eff0f1;
+	border-radius: 3px;
+	margin-bottom: 1em;
+}
+
+h1, h2, h3 {
+	font-size: 1.5em!important;
+}
+
+.bold {
+	font-size: 1.1em!important;
+}
+
+h3 {
+	font-size: 1em!important;
+}
+
+blockquote {
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #FFF8DC;
+    border-left: 2px solid #ffeb8e;
+}
+
+</style>
+<head>
+	<meta charset="utf-8">
+	<title>QASO</title>
+	<!-- Also can add styles -->
+	<!-- 	<style>
+	body {background-color: powderblue;}
+	h1   {color: blue;}
+	p    {color: red;}
+	</style> -->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+	<script
+  src="https://code.jquery.com/jquery-3.4.1.min.js"
+  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+  crossorigin="anonymous"></script>
+
+	<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script> -->
+</head>
+
+
+<body style="margin-left:3%;">
+	<div id='loading'> 
+		<h1>Welcome to Question Answer Analysis:</h1>
+		<br><br><br>
+		<h4>Ask your question: </h4>
+		<!-- <input type="text" name="question"> -->
+		<textarea id="question", name="question", cols="90" rows="4"> </textarea>
+		<br>
+		<!-- <button id='q-send'>Send</button> -->
+		<button id='q-send' class="btn btn-primary" type="button">Send   </button>
+
+		<button id='qa-loading' class="btn btn-primary" type="button" style="display:none;" disabled>
+		  <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+		  Loading...
+		</button>
+
+
+		<br><br>
+		<h4 id='no-answer' style="display:none;"> No answer found. Sorry :(</h4>
+		<div id="qa-block", name="answer" cols="90" rows="4" style="display:none;margin-left:1%;">
+			<div class="row"> <!-- For columns of div https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_three_columns -->
+				<div style="float:left; width:52%;">
+					<h4 style="color:#a70000">Complete Question: </h4>
+					<div id='qtitle'></div>
+					<div  style="border-bottom:1px solid #bb2323;"></div>
+					<br>
+					<div id='qbody'></div>
+					<br><br>
+					<div> 
+						<span>
+							<h4 style="border-bottom:2px solid #8fbb23;">Answer: </h4>
+							<!-- <div id='rc'></div> -->
+							<br>
+							<div style="border-bottom:1px solid #9fa295;" class="bold"><b>Most Voted Answer:</b></div> 
+							<div id="most_voted_answer"></div>
+							<br>
+							<div style="border-bottom:1px solid #9fa295;" class="bold"><b>Accepted Answer:</b></div> 
+							<div id="acc_answer"></div>
+							<br>
+						</span> 
+					</div>
+				</div>
+
+				<div style="float:left; width:3%;"></div>
+				
+				<div style="float:left; margin-top:10px; width:40%;"> 
+					<div id='suggested-answers' style="display:none"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+	<script type="text/javascript">
+		
+		$("#question").on("focus", function(e) { // mousedown mouseup click
+ 			 console.log("%s: %s", this.tagName, e.type);
+ 			 // $("#question").hide()
+ 			 $(this).css({'border': '0.5px solid #000'})
+		})
+
+		$("#q-send").click(function (e) {
+			// alert( "Handler for .click() called." );
+ 			console.log('llllllllll');
+			$('#no-answer').hide()
+
+ 			var search_text = $('#question').val().trim();
+ 			console.log(search_text);
+
+ 			if (search_text === "") {
+ 				alert("Please, input your query in textarea.");
+ 				$('#question').css({'border': '1px solid #f00'});
+ 				return 
+ 			}
+
+ 			var dest_url = window.location.href + 'qac'
+ 			console.log('dest_url = ', dest_url)
+
+ 			$.ajax({
+				url : dest_url,
+				type: "GET",
+				data: {'search_text': search_text}, // no need to join or convert in string as participant_ids is an array of string(['1', '3']) and can easily be used on server side
+				// async: false,
+			    contentType: 'application/json; charset=utf-8',
+			    dataType: 'json',
+
+			    beforeSend: function() {
+			    	$('#q-send').hide();
+			    	$("#qa-block").hide()
+				    $('#qa-loading').show();
+				 },
+				 complete: function(){
+				     $('#qa-loading').hide();
+				     $('#q-send').show();
+
+				 },
+				success: function(data){
+
+					// json_data = {'q_title': str(self.q_title),
+					// 'q_url'
+					// 'q_body': str(self.q_body),
+					// 'is_ans_accepted': self.is_ans_accepted,
+					// 'ans_body': str(self.ans_body),
+					// 'rc': self.rc,
+					// 'cats': self.cats,ff
+					// 'suggestest_answers': self.suggestest_answers
+				
+					// console.log(data)
+
+					if (!('q_title'  in data)){
+						$('#no-answer').show()
+						return;
+					} 
+
+					$('#qtitle').html(`<a href="${data.q_url}" target="_blank">${data.q_title}</a>` )
+					$('#qbody').html(data.q_body)
+
+					// var rc_html = `<span style="color:#17a00f; font-weight:bold;">Root Cause</span> (Prob: {'tpn': ${Number(parseFloat(data.cats.opt.has_rc).toFixed(4))}, 'trf': ${Number(parseFloat(data.cats.imp.has_rc).toFixed(4))}}): ${data.rc}`
+					
+					// var rc_html = `<span style="color:#17a00f; font-weight:bold;">Root Cause</span> (Prob: ${Number(parseFloat(data.cats.imp.has_rc).toFixed(4))}): ${data.rc}`
+
+					// $('#rc').html(rc_html)
+					$('#most_voted_answer').html(data.most_voted_ans_body)
+
+					// console.log("\n\nAccepted Answer:\n")
+					// console.log(data.acc_ans_body)
+
+					if(!data.acc_ans_body){
+						$('#acc_answer').html('No accepted answer. Sorry :(')
+					}else{
+						$('#acc_answer').html(data.acc_ans_body)
+					}
+					
+
+
+
+					if (!$.isEmptyObject(data.suggestest_answers)){
+						var pre_html = '<div style="border-bottom:1px solid #a4b900;">Other Suggested Answer(s):</div><br>'
+						
+						suggestest_answers_list = ''
+						for (const [key, value] of Object.entries(data.suggestest_answers)) {
+							console.log(key, value)
+  							suggestest_answers_list += `<li> <a style="background-color:#eff0f1" href="${key}" target="_blank">${value}</a> </li>`
+						}
+						suggestest_answers_html = pre_html + '<ul>' + suggestest_answers_list + '</ul>'
+						$('#suggested-answers').html(suggestest_answers_html)
+						$('#suggested-answers').show()
+					}
+
+					$("#qa-block").show()
+ 					// TODO:  
+ 					// $("#qa-block").append("<p>Coming Soon...</p>") // return from server append here	
+				},
+				fail: function (argument) {
+					console.log('\n\n\n[Failed]')
+					console.log(argument)
+
+					
+					alert('In fail...')
+				},
+				error: function (argument) {
+					alert('Some error occured with your request...')
+					console.log(argument)
+				}
+			});
+	  		// return false;
+		});
+
+
+	</script>
+
+</html>
