@@ -1,13 +1,10 @@
 # Specify the base Image
-# FROM python:3.6
-# numpy==1.16.4
-
-#3.6
 FROM python:3-slim 
 
-# Addtion
+# Maintainer
 LABEL maintainer="prem4708@gmail.com"
 
+# Update
 RUN apt-get update \
      && apt-get install -y \
         libgl1-mesa-glx \
@@ -15,16 +12,10 @@ RUN apt-get update \
      && apt-get clean all \
      && rm -r /var/lib/apt/lists/*
 
-# RUN /opt/conda/bin/conda install --yes \
-#    matplotlib \
-#    pandas \
-#    scikit-learn \
-#    scikit-image 
-
-
 
 # Set working directory
 WORKDIR /qaso
+
 
 # First copy and install requirements so further cache can be used
 COPY ./requirements.txt ./requirements.txt

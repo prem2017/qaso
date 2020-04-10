@@ -6,7 +6,9 @@ services:
       dockerfile: Dockerfile 
 
     image: voyager2020/qaso_web
-    # if both not provided Service web has neither an image nor a build context specified. At least one must be provided.
+    
+    # If the image is already present locally then no build will be performed and directly 
+    # command will be executed with the container from the prebuilt image.
     
     # command: '/bin/sh -c "echo "Web server running @ http://127.0.0.1:8000/""'
     command: python manage.py runserver 0.0.0.0:8000
@@ -18,4 +20,7 @@ services:
       - "8000:8000"
 
   database:
-    image: redis
+    image: redis 
+    # This is not in use and is, in fact, to show that `docker-compose` is actually for 
+    # composing multiple services where each service image can be built with their respective Dockerfile. 
+    # If one wants then one can give a Dockerfile for building custom database image as well.

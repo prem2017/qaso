@@ -1,7 +1,7 @@
 # QASO: Question Answer From StackOverflow
 ![Language](https://img.shields.io/badge/language-Python-blue.svg) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Question answering system for programming related issues mainly (for now only) extracted from StackOverflow (SO). This application is mainly to better understand the working of docker.
+Question answering system for programming related issues mainly (for now only) extracted from StackOverflow (SO). This application is mainly to better understand the working of docker but not limited.
 
 
 
